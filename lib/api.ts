@@ -1,0 +1,86 @@
+import type { AuthResponse, APIKey, Project, Vulnerability, DiffResult, User, ScanSummary } from "./types";
+
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("token");
+}
+
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE}${path}`, { ...options, headers });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+// Auth
+export const authApi = {
+  register: (org_name: string, email: string, password: string) =>
+    request<AuthResponse>("/api/v1/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ org_name, email, password }),
+    }),
+  login: (email: string, password: string) =>
+    request<AuthResponse>("/api/v1/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+  me: () => request<User>("/api/v1/auth/me"),
+  changePassword: (current_password: string, new_password: string) =>
+    request<void>("/api/v1/auth/password", {
+      method: "PUT",
+      body: JSON.stringify({ current_password, new_password }),
+    }),
+};
+
+// Projects
+export const projectsApi = {
+  list: () => request<Project[]>("/api/v1/projects"),
+  diff: (name: string) => request<DiffResult>(`/api/v1/projects/${encodeURIComponent(name)}/diff`),
+  scans: (name: string) => request<ScanSummary[]>(`/api/v1/projects/${encodeURIComponent(name)}/scans`),
+  scanVulnerabilities: (scanId: number) => request<Vulnerability[]>(`/api/v1/scans/${scanId}/vulnerabilities`),
+};
+
+// Vulnerabilities
+export const vulnApi = {
+  list: () => request<Vulnerability[]>("/api/v1/vulnerabilities"),
+};
+
+// Members
+export const membersApi = {
+  list: () => request<User[]>("/api/v1/members"),
+  invite: (email: string, role: string) =>
+    request<void>("/api/v1/members/invite", {
+      method: "POST",
+      body: JSON.stringify({ email, role }),
+    }),
+  updateRole: (id: number, role: string) =>
+    request<void>(`/api/v1/members/${id}/role`, {
+      method: "PUT",
+      body: JSON.stringify({ role }),
+    }),
+  remove: (id: number) =>
+    request<void>(`/api/v1/members/${id}`, { method: "DELETE" }),
+};
+
+// API Keys
+export const apiKeysApi = {
+  list: () => request<APIKey[]>("/api/v1/api-keys"),
+  create: (name: string) =>
+    request<APIKey>("/api/v1/api-keys", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    }),
+  revoke: (id: number) =>
+    request<void>(`/api/v1/api-keys/${id}`, { method: "DELETE" }),
+};
