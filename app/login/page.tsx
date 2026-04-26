@@ -29,60 +29,51 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[#0f1117] flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-3">
-            <Shield className="w-10 h-10 text-blue-600" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500/10 mb-4">
+            <Shield className="w-6 h-6 text-indigo-400" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Trivy Dashboard</h1>
-          <p className="text-gray-500 mt-1">Sign in to your organization</p>
+          <h1 className="text-2xl font-bold text-[#e8eaf0]">TrivyHub</h1>
+          <p className="text-[#6b7280] text-sm mt-1">Sign in to your organization</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-5">
+        <div className="bg-[#16181f] border border-[#2a2d3a] rounded-xl p-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg px-4 py-3 text-sm mb-4">
               {error}
             </div>
           )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-[#9ca3af] mb-1.5">Email</label>
+              <input
+                type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                className="w-full bg-[#0f1117] border border-[#2a2d3a] rounded-lg px-3 py-2.5 text-sm text-[#e8eaf0] focus:outline-none focus:border-indigo-500 transition-colors"
+                placeholder="you@company.com"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#9ca3af] mb-1.5">Password</label>
+              <input
+                type="password" value={password} onChange={e => setPassword(e.target.value)} required
+                className="w-full bg-[#0f1117] border border-[#2a2d3a] rounded-lg px-3 py-2.5 text-sm text-[#e8eaf0] focus:outline-none focus:border-indigo-500 transition-colors"
+                placeholder="••••••••"
+              />
+            </div>
+            <button type="submit" disabled={loading}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm mt-2"
+            >
+              {loading ? "Signing in…" : "Sign in"}
+            </button>
+          </form>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="you@company.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-2 rounded-lg transition-colors text-sm"
-          >
-            {loading ? "Signing in…" : "Sign in"}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-[#6b7280] mt-4">
           No account?{" "}
-          <Link href="/register" className="text-blue-600 hover:underline font-medium">
-            Create your organization
+          <Link href="/register" className="text-indigo-400 hover:text-indigo-300 font-medium">
+            Create organization
           </Link>
         </p>
       </div>

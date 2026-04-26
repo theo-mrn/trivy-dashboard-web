@@ -2,15 +2,12 @@
 import { useEffect, useState } from "react";
 import { membersApi } from "@/lib/api";
 import { getUser } from "@/lib/auth";
-import type { User, Role } from "@/lib/types";
+import type { User } from "@/lib/types";
+import { Card } from "@/components/ui/Card";
+import { RoleBadge } from "@/components/ui/Badge";
+import { TableSkeleton } from "@/components/ui/Skeleton";
 import { UserPlus, Trash2 } from "lucide-react";
-
-const roleColors: Record<Role, string> = {
-  owner: "bg-purple-100 text-purple-800",
-  admin: "bg-blue-100 text-blue-800",
-  member: "bg-green-100 text-green-800",
-  viewer: "bg-gray-100 text-gray-600",
-};
+import { format } from "date-fns";
 
 function InviteModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [email, setEmail] = useState("");
@@ -20,51 +17,38 @@ function InviteModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-    try {
-      await membersApi.invite(email, role);
-      onSuccess();
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed");
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true); setError("");
+    try { await membersApi.invite(email, role); onSuccess(); onClose(); }
+    catch (err) { setError(err instanceof Error ? err.message : "Failed"); }
+    finally { setLoading(false); }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Invite member</h2>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-[#16181f] border border-[#2a2d3a] rounded-xl w-full max-w-md p-6">
+        <h2 className="text-base font-semibold text-[#e8eaf0] mb-4">Invite member</h2>
         <form onSubmit={submit} className="space-y-4">
-          {error && <div className="bg-red-50 text-red-700 text-sm px-3 py-2 rounded-lg border border-red-200">{error}</div>}
+          {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-3 py-2 rounded-lg">{error}</div>}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <label className="block text-xs font-medium text-[#9ca3af] mb-1.5">Email</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
+              className="w-full bg-[#0f1117] border border-[#2a2d3a] rounded-lg px-3 py-2.5 text-sm text-[#e8eaf0] focus:outline-none focus:border-indigo-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select
-              value={role}
-              onChange={e => setRole(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <label className="block text-xs font-medium text-[#9ca3af] mb-1.5">Role</label>
+            <select value={role} onChange={e => setRole(e.target.value)}
+              className="w-full bg-[#0f1117] border border-[#2a2d3a] rounded-lg px-3 py-2.5 text-sm text-[#e8eaf0] focus:outline-none focus:border-indigo-500"
             >
-              <option value="viewer">Viewer</option>
-              <option value="member">Member</option>
-              <option value="admin">Admin</option>
+              <option value="viewer">Viewer — read only</option>
+              <option value="member">Member — can push reports</option>
+              <option value="admin">Admin — manage keys & members</option>
             </select>
           </div>
-          <div className="flex gap-3 justify-end">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Cancel</button>
-            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-              {loading ? "Inviting…" : "Invite"}
+          <div className="flex gap-3 justify-end pt-1">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-[#6b7280] hover:text-[#e8eaf0] transition-colors">Cancel</button>
+            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg disabled:opacity-50 transition-colors">
+              {loading ? "Inviting…" : "Send invite"}
             </button>
           </div>
         </form>
@@ -87,7 +71,6 @@ export default function MembersPage() {
     setLoading(true);
     membersApi.list().then(m => setMembers(m ?? [])).finally(() => setLoading(false));
   }
-
   useEffect(() => { reload(); }, []);
 
   async function changeRole(id: number, role: string) {
@@ -105,13 +88,12 @@ export default function MembersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Members</h1>
-          <p className="text-sm text-gray-500 mt-1">{members.length} member{members.length !== 1 ? "s" : ""}</p>
+          <h1 className="text-xl font-bold text-[#e8eaf0]">Members</h1>
+          <p className="text-sm text-[#6b7280] mt-0.5">{members.length} member{members.length !== 1 ? "s" : ""}</p>
         </div>
         {canInvite && (
-          <button
-            onClick={() => setShowInvite(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+          <button onClick={() => setShowInvite(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm rounded-lg transition-colors"
           >
             <UserPlus className="w-4 h-4" />
             Invite member
@@ -119,63 +101,55 @@ export default function MembersPage() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <Card>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Role</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Member since</th>
-              {isOwner && <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>}
+          <thead>
+            <tr className="border-b border-[#2a2d3a]">
+              {["Member", "Role", "Joined", ...(isOwner ? ["Actions"] : [])].map(h => (
+                <th key={h} className={`text-left px-5 py-3 text-xs font-medium text-[#6b7280] ${h === "Actions" ? "text-right" : ""}`}>{h}</th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
-            {loading && (
-              <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">Loading…</td></tr>
-            )}
-            {members.map(m => (
-              <tr key={m.id} className={`hover:bg-gray-50 transition-colors ${m.id === currentUser?.id ? "bg-blue-50/40" : ""}`}>
-                <td className="px-4 py-3 text-gray-900">
-                  {m.email}
-                  {m.id === currentUser?.id && <span className="ml-2 text-xs text-gray-400">(you)</span>}
-                </td>
-                <td className="px-4 py-3">
-                  {isOwner && m.id !== currentUser?.id ? (
-                    <select
-                      value={m.role}
-                      onChange={e => changeRole(m.id, e.target.value)}
-                      className="border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    >
-                      <option value="viewer">Viewer</option>
-                      <option value="member">Member</option>
-                      <option value="admin">Admin</option>
-                      <option value="owner">Owner</option>
-                    </select>
-                  ) : (
-                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium capitalize ${roleColors[m.role as Role] ?? "bg-gray-100 text-gray-600"}`}>
-                      {m.role}
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-gray-400 text-xs">{new Date(m.created_at).toLocaleDateString()}</td>
-                {isOwner && (
-                  <td className="px-4 py-3 text-right">
-                    {m.id !== currentUser?.id && (
-                      <button
-                        onClick={() => remove(m.id)}
-                        className="text-gray-400 hover:text-red-600 transition-colors"
-                        title="Remove member"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
+          {loading ? <TableSkeleton rows={4} cols={isOwner ? 4 : 3} /> : (
+            <tbody className="divide-y divide-[#2a2d3a]">
+              {members.map(m => (
+                <tr key={m.id} className={`hover:bg-[#1e2028] transition-colors ${m.id === currentUser?.id ? "bg-indigo-500/5" : ""}`}>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-indigo-500/10 flex items-center justify-center text-xs font-semibold text-indigo-400">
+                        {m.email[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm text-[#e8eaf0]">{m.email}</p>
+                        {m.id === currentUser?.id && <p className="text-xs text-[#6b7280]">You</p>}
+                      </div>
+                    </div>
                   </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
+                  <td className="px-5 py-4">
+                    {isOwner && m.id !== currentUser?.id ? (
+                      <select value={m.role} onChange={e => changeRole(m.id, e.target.value)}
+                        className="bg-[#0f1117] border border-[#2a2d3a] rounded-lg px-2 py-1 text-xs text-[#e8eaf0] focus:outline-none focus:border-indigo-500"
+                      >
+                        {["viewer", "member", "admin", "owner"].map(r => <option key={r} value={r}>{r}</option>)}
+                      </select>
+                    ) : <RoleBadge role={m.role} />}
+                  </td>
+                  <td className="px-5 py-4 text-xs text-[#6b7280]">{format(new Date(m.created_at), "MMM d, yyyy")}</td>
+                  {isOwner && (
+                    <td className="px-5 py-4 text-right">
+                      {m.id !== currentUser?.id && (
+                        <button onClick={() => remove(m.id)} className="text-[#6b7280] hover:text-red-400 transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          )}
         </table>
-      </div>
+      </Card>
 
       {showInvite && <InviteModal onClose={() => setShowInvite(false)} onSuccess={reload} />}
     </div>
