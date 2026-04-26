@@ -49,6 +49,8 @@ export interface Vulnerability {
   installed_version: string;
   fixed_version: string;
   title: string;
+  description: string;
+  primary_url: string;
   is_fixed: boolean;
   first_seen_at: string;
 }
