@@ -43,11 +43,16 @@ export default function ProjectDetailPage() {
     Promise.all([
       projectsApi.list(),
       projectsApi.scans(name),
-      vulnApi.list(1, 100),
-    ]).then(([projects, s, v]) => {
-      setProject(projects?.find(p => p.name === name) ?? null);
-      setScans(s ?? []);
-      setVulns(v?.data ?? []);
+    ]).then(async ([projects, s]) => {
+      const foundProject = projects?.find(p => p.name === name) ?? null;
+      const scanList = s ?? [];
+      setProject(foundProject);
+      setScans(scanList);
+      // charge les vulnérabilités du dernier scan
+      if (scanList.length > 0) {
+        const v = await projectsApi.scanVulnerabilities(scanList[0].id);
+        setVulns(v ?? []);
+      }
     }).finally(() => setLoading(false));
   }, [name]);
 
@@ -63,10 +68,10 @@ export default function ProjectDetailPage() {
     : 0;
 
   const severityData = [
-    { name: "Critical", value: latest?.critical ?? 0, color: "#ef4444" },
-    { name: "High",     value: latest?.high ?? 0,     color: "#f97316" },
-    { name: "Medium",   value: latest?.medium ?? 0,   color: "#eab308" },
-    { name: "Low",      value: latest?.low ?? 0,      color: "#3b82f6" },
+    { name: "Critical", value: project?.critical ?? latest?.critical ?? 0, color: "#ef4444" },
+    { name: "High",     value: project?.high ?? latest?.high ?? 0,         color: "#f97316" },
+    { name: "Medium",   value: project?.medium ?? latest?.medium ?? 0,     color: "#eab308" },
+    { name: "Low",      value: project?.low ?? latest?.low ?? 0,           color: "#3b82f6" },
   ];
 
   if (loading) {
@@ -114,10 +119,10 @@ export default function ProjectDetailPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Critical", value: latest?.critical ?? 0, color: "text-red-400 bg-red-500/10" },
-          { label: "High",     value: latest?.high ?? 0,     color: "text-orange-400 bg-orange-500/10" },
-          { label: "Medium",   value: latest?.medium ?? 0,   color: "text-yellow-400 bg-yellow-500/10" },
-          { label: "Low",      value: latest?.low ?? 0,      color: "text-blue-400 bg-blue-500/10" },
+          { label: "Critical", value: project?.critical ?? 0, color: "text-red-400 bg-red-500/10" },
+          { label: "High",     value: project?.high ?? 0,     color: "text-orange-400 bg-orange-500/10" },
+          { label: "Medium",   value: project?.medium ?? 0,   color: "text-yellow-400 bg-yellow-500/10" },
+          { label: "Low",      value: project?.low ?? 0,      color: "text-blue-400 bg-blue-500/10" },
         ].map(({ label, value, color }) => (
           <Card key={label} className="p-5">
             <p className="text-xs font-medium text-[#6b7280] uppercase tracking-wide">{label}</p>
