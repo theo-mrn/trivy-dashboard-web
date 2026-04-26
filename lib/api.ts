@@ -46,8 +46,8 @@ export const authApi = {
 // Projects
 export const projectsApi = {
   list: () => request<Project[]>("/api/v1/projects"),
-  diff: (name: string) => request<DiffResult>(`/api/v1/projects/${encodeURIComponent(name)}/diff`),
-  scans: (name: string) => request<ScanSummary[]>(`/api/v1/projects/${encodeURIComponent(name)}/scans`),
+  diff: (name: string) => request<DiffResult>(`/api/v1/projects/diff?name=${encodeURIComponent(name)}`),
+  scans: (name: string) => request<ScanSummary[]>(`/api/v1/projects/scans?name=${encodeURIComponent(name)}`),
   scanVulnerabilities: (scanId: number) => request<Vulnerability[]>(`/api/v1/scans/${scanId}/vulnerabilities`),
 };
 
