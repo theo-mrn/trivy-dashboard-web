@@ -4,7 +4,7 @@ Security posture management dashboard. Visualizes Trivy vulnerability reports co
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue) ![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4)
 
-**Live:** https://trivy-dashboard-web.vercel.app  
+**Live:** https://dashboard.trivyhub.fr  
 **API:** https://api.trivyhub.fr
 
 ---
