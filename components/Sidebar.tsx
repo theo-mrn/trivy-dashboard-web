@@ -3,18 +3,21 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard, FolderGit2, ShieldAlert, Users, Key, LogOut, Shield, ChevronLeft, ChevronRight
+  LayoutDashboard, FolderGit2, ShieldAlert, Users, Key,
+  LogOut, Shield, ChevronLeft, ChevronRight, Sun, Moon, Settings
 } from "lucide-react";
 import { clearAuth, getUser } from "@/lib/auth";
+import { getTheme, setTheme, initTheme } from "@/lib/theme";
 import type { User } from "@/lib/types";
 import { RoleBadge } from "@/components/ui/Badge";
 
 const nav = [
-  { href: "/dashboard",                  label: "Overview",        icon: LayoutDashboard },
-  { href: "/dashboard/projects",         label: "Projects",        icon: FolderGit2 },
-  { href: "/dashboard/vulnerabilities",  label: "Vulnerabilities", icon: ShieldAlert },
-  { href: "/dashboard/members",          label: "Members",         icon: Users },
-  { href: "/dashboard/api-keys",         label: "API Keys",        icon: Key },
+  { href: "/dashboard",                 label: "Overview",        icon: LayoutDashboard },
+  { href: "/dashboard/projects",        label: "Projects",        icon: FolderGit2 },
+  { href: "/dashboard/vulnerabilities", label: "Vulnerabilities", icon: ShieldAlert },
+  { href: "/dashboard/members",         label: "Members",         icon: Users },
+  { href: "/dashboard/api-keys",        label: "API Keys",        icon: Key },
+  { href: "/dashboard/settings",        label: "Settings",        icon: Settings },
 ];
 
 export function Sidebar() {
@@ -22,23 +25,38 @@ export function Sidebar() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [theme, setThemeState] = useState<"dark" | "light">("dark");
 
-  useEffect(() => { setUser(getUser()); }, []);
+  useEffect(() => {
+    setUser(getUser());
+    initTheme();
+    setThemeState(getTheme());
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    setThemeState(next);
+  }
 
   function logout() { clearAuth(); router.push("/login"); }
 
   return (
-    <aside className={`flex-shrink-0 flex flex-col h-screen sticky top-0 bg-[#16181f] border-r border-[#2a2d3a] transition-all duration-200 ${collapsed ? "w-16" : "w-56"}`}>
+    <aside style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
+      className={`flex-shrink-0 flex flex-col h-screen sticky top-0 border-r transition-all duration-200 ${collapsed ? "w-16" : "w-56"}`}
+    >
       {/* Logo */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-[#2a2d3a]">
+      <div style={{ borderColor: "var(--border)" }} className="flex items-center justify-between px-4 py-4 border-b">
         {!collapsed && (
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-indigo-400 flex-shrink-0" />
-            <span className="font-semibold text-sm text-[#e8eaf0]">TrivyHub</span>
+            <span className="font-semibold text-sm" style={{ color: "var(--text)" }}>TrivyHub</span>
           </div>
         )}
         {collapsed && <Shield className="w-5 h-5 text-indigo-400 mx-auto" />}
-        <button onClick={() => setCollapsed(c => !c)} className="text-[#6b7280] hover:text-[#e8eaf0] transition-colors ml-auto">
+        <button onClick={() => setCollapsed(c => !c)} style={{ color: "var(--text-muted)" }}
+          className="hover:text-indigo-400 transition-colors ml-auto"
+        >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
@@ -49,11 +67,10 @@ export function Sidebar() {
           const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
           return (
             <Link key={href} href={href} title={collapsed ? label : undefined}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group ${
-                active
-                  ? "bg-indigo-500/10 text-indigo-400"
-                  : "text-[#6b7280] hover:text-[#e8eaf0] hover:bg-[#1e2028]"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                active ? "bg-indigo-500/10 text-indigo-400" : "hover:bg-[var(--bg-hover)]"
               }`}
+              style={{ color: active ? undefined : "var(--text-muted)" }}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
               {!collapsed && label}
@@ -62,16 +79,28 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* User */}
-      <div className="px-3 py-4 border-t border-[#2a2d3a]">
+      {/* Bottom */}
+      <div style={{ borderColor: "var(--border)" }} className="px-3 py-4 border-t space-y-3">
+        {/* Theme toggle */}
+        <button onClick={toggleTheme} title={theme === "dark" ? "Light mode" : "Dark mode"}
+          className={`flex items-center gap-2 text-sm transition-colors w-full px-3 py-2 rounded-lg hover:bg-[var(--bg-hover)] ${collapsed ? "justify-center" : ""}`}
+          style={{ color: "var(--text-muted)" }}
+        >
+          {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {!collapsed && (theme === "dark" ? "Light mode" : "Dark mode")}
+        </button>
+
+        {/* User */}
         {!collapsed && user && (
-          <div className="mb-3">
-            <p className="text-xs text-[#e8eaf0] font-medium truncate">{user.email}</p>
+          <div className="px-3 pb-1">
+            <p className="text-xs font-medium truncate" style={{ color: "var(--text)" }}>{user.email}</p>
             <div className="mt-1"><RoleBadge role={user.role} /></div>
           </div>
         )}
+
         <button onClick={logout} title="Logout"
-          className={`flex items-center gap-2 text-sm text-[#6b7280] hover:text-[#e8eaf0] transition-colors ${collapsed ? "justify-center w-full" : ""}`}
+          className={`flex items-center gap-2 text-sm transition-colors w-full px-3 py-2 rounded-lg hover:bg-[var(--bg-hover)] ${collapsed ? "justify-center" : ""}`}
+          style={{ color: "var(--text-muted)" }}
         >
           <LogOut className="w-4 h-4" />
           {!collapsed && "Logout"}
