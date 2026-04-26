@@ -127,7 +127,7 @@ export default function VulnerabilitiesPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#2a2d3a]">
-                {["CVE ID", "Severity", "Package", "Installed", "Fix version", "Title", "Status", "Age", "First seen"].map(h => (
+                {["CVE ID", "Severity", "Package", "Installed", "Fix version", "Title", "Description", "Link", "Status", "Age", "First seen"].map(h => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-medium text-[#6b7280] whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -137,7 +137,7 @@ export default function VulnerabilitiesPage() {
             ) : (
               <tbody className="divide-y divide-[#2a2d3a]">
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={9}><Empty title="No vulnerabilities found" /></td></tr>
+                  <tr><td colSpan={11}><Empty title="No vulnerabilities found" /></td></tr>
                 ) : filtered.map(v => (
                   <tr key={v.id} className="hover:bg-[#1e2028] transition-colors">
                     <td className="px-4 py-3 font-mono text-xs font-semibold text-[#e8eaf0]">{v.cve_id}</td>
@@ -148,6 +148,12 @@ export default function VulnerabilitiesPage() {
                       {v.fixed_version ? <span className="text-green-400">{v.fixed_version}</span> : <span className="text-[#6b7280]">—</span>}
                     </td>
                     <td className="px-4 py-3 text-[#6b7280] max-w-xs truncate text-xs" title={v.title}>{v.title || "—"}</td>
+                    <td className="px-4 py-3 text-[#6b7280] max-w-xs truncate text-xs" title={v.description}>{v.description || "—"}</td>
+                    <td className="px-4 py-3 text-xs">
+                      {v.primary_url
+                        ? <a href={v.primary_url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline">NVD ↗</a>
+                        : <span className="text-[#6b7280]">—</span>}
+                    </td>
                     <td className="px-4 py-3">
                       {v.is_fixed
                         ? <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">Fixed</span>

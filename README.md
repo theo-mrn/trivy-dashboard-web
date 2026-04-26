@@ -9,6 +9,7 @@ Security posture management dashboard. Visualizes Trivy vulnerability reports co
 
 ---
 
+---
 ## Features
 
 - **Overview** — global risk score, CVE trend chart, top at-risk projects
