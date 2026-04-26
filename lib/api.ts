@@ -51,9 +51,17 @@ export const projectsApi = {
   scanVulnerabilities: (scanId: number) => request<Vulnerability[]>(`/api/v1/scans/${scanId}/vulnerabilities`),
 };
 
+export interface VulnPage {
+  data: Vulnerability[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 // Vulnerabilities
 export const vulnApi = {
-  list: () => request<Vulnerability[]>("/api/v1/vulnerabilities"),
+  list: (page = 1, limit = 100, severity = "") =>
+    request<VulnPage>(`/api/v1/vulnerabilities?page=${page}&limit=${limit}${severity ? `&severity=${severity}` : ""}`),
 };
 
 // Members

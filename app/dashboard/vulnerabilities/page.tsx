@@ -8,27 +8,28 @@ const SEVERITIES: Severity[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"];
 
 export default function VulnerabilitiesPage() {
   const [vulns, setVulns] = useState<Vulnerability[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [severityFilter, setSeverityFilter] = useState<Severity | "ALL">("ALL");
   const [fixedFilter, setFixedFilter] = useState<"ALL" | "FIXED" | "UNFIXED">("ALL");
 
   useEffect(() => {
-    vulnApi.list().then(v => setVulns(v ?? [])).finally(() => setLoading(false));
-  }, []);
+    setLoading(true);
+    vulnApi.list(page, 100, severityFilter === "ALL" ? "" : severityFilter)
+      .then(v => { setVulns(v?.data ?? []); setTotal(v?.total ?? 0); })
+      .finally(() => setLoading(false));
+  }, [page, severityFilter]);
 
   const filtered = vulns.filter(v => {
-    if (severityFilter !== "ALL" && v.severity !== severityFilter) return false;
     if (fixedFilter === "FIXED" && !v.is_fixed) return false;
     if (fixedFilter === "UNFIXED" && v.is_fixed) return false;
     const q = search.toLowerCase();
     return !q || v.cve_id.toLowerCase().includes(q) || v.package_name.toLowerCase().includes(q) || (v.title ?? "").toLowerCase().includes(q);
   });
 
-  const counts = SEVERITIES.reduce((acc, s) => {
-    acc[s] = vulns.filter(v => v.severity === s).length;
-    return acc;
-  }, {} as Record<Severity, number>);
+  const totalPages = Math.ceil(total / 100);
 
   return (
     <div className="space-y-6">
@@ -37,18 +38,21 @@ export default function VulnerabilitiesPage() {
         <p className="text-sm text-gray-500 mt-1">Latest scan results across all projects</p>
       </div>
 
-      {/* Severity summary */}
+      {/* Severity filter */}
       <div className="flex gap-3 flex-wrap">
+        <button
+          onClick={() => { setSeverityFilter("ALL"); setPage(1); }}
+          className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors bg-white border-gray-200 ${severityFilter === "ALL" ? "ring-2 ring-offset-1 ring-blue-500" : "hover:bg-gray-50"}`}
+        >
+          All <span className="text-gray-400 ml-1">{total}</span>
+        </button>
         {SEVERITIES.map(s => (
           <button
             key={s}
-            onClick={() => setSeverityFilter(prev => prev === s ? "ALL" : s)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-              severityFilter === s ? "ring-2 ring-offset-1 ring-blue-500" : "hover:bg-gray-50"
-            } bg-white border-gray-200`}
+            onClick={() => { setSeverityFilter(prev => prev === s ? "ALL" : s); setPage(1); }}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors bg-white border-gray-200 ${severityFilter === s ? "ring-2 ring-offset-1 ring-blue-500" : "hover:bg-gray-50"}`}
           >
             <SeverityBadge severity={s} />
-            <span className="text-gray-700">{counts[s]}</span>
           </button>
         ))}
       </div>
@@ -114,6 +118,26 @@ export default function VulnerabilitiesPage() {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+          >
+            ← Prev
+          </button>
+          <span className="text-sm text-gray-500">Page {page} / {totalPages}</span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+          >
+            Next →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

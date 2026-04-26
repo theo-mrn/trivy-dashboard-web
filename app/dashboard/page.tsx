@@ -25,8 +25,8 @@ export default function OverviewPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([projectsApi.list(), vulnApi.list()])
-      .then(([p, v]) => { setProjects(p ?? []); setVulns(v ?? []); })
+    Promise.all([projectsApi.list(), vulnApi.list(1, 500)])
+      .then(([p, v]) => { setProjects(p ?? []); setVulns(v?.data ?? []); })
       .finally(() => setLoading(false));
   }, []);
 
