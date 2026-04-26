@@ -86,7 +86,7 @@ function ScanRow({ scan, index }: { scan: ScanSummary; index: number }) {
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="text-left border-b border-[#2a2d3a]">
-                        {["CVE", "Severity", "Package", "Version", "Fix", "Status"].map(h => (
+                        {["CVE", "Severity", "Package", "Version", "Fix", "Description", "Link", "Status"].map(h => (
                           <th key={h} className="py-2 pr-4 font-medium text-[#6b7280]">{h}</th>
                         ))}
                       </tr>
@@ -99,6 +99,8 @@ function ScanRow({ scan, index }: { scan: ScanSummary; index: number }) {
                           <td className="py-2 pr-4 text-[#e8eaf0]">{v.package_name}</td>
                           <td className="py-2 pr-4 font-mono text-[#6b7280]">{v.installed_version}</td>
                           <td className="py-2 pr-4 font-mono">{v.fixed_version ? <span className="text-green-400">{v.fixed_version}</span> : <span className="text-[#6b7280]">—</span>}</td>
+                          <td className="py-2 pr-4 text-[#6b7280] max-w-xs truncate" title={v.description}>{v.description || "—"}</td>
+                          <td className="py-2 pr-4">{v.primary_url ? <a href={v.primary_url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline text-xs">NVD ↗</a> : <span className="text-[#6b7280]">—</span>}</td>
                           <td className="py-2">
                             {v.is_fixed
                               ? <span className="text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full">Fixed</span>
