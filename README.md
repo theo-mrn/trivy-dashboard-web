@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TrivyHub — Frontend
 
-## Getting Started
+Security posture management dashboard. Visualizes Trivy vulnerability reports collected from CI/CD pipelines.
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-16-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue) ![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4)
+
+**Live:** https://trivy-dashboard-web.vercel.app  
+**API:** https://api.trivyhub.fr
+
+---
+
+## Features
+
+- **Overview** — global risk score, CVE trend chart, top at-risk projects
+- **Projects** — card grid with severity bars, risk score, environment filter
+- **Project detail** — CVE evolution chart, diff vs previous scan, recent scans
+- **Vulnerabilities** — paginated table with SLA age badge (⚠ CRITICAL > 7d), severity filter, CSV export
+- **Scan history** — full timeline per project with pipeline link, CVE drill-down per scan
+- **Members** — invite, role management
+- **API Keys** — create, copy, revoke
+- **Settings** — change password, account info
+- **Search** — global Cmd+K palette (projects + CVEs)
+- **Dark / Light mode** — toggle in sidebar, persisted
+
+---
+
+## Stack
+
+| Component | Technology |
+|-----------|------------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| Charts | Recharts |
+| Icons | Lucide React |
+| Deploy | Vercel |
+
+---
+
+## Local development
+
+```bash
+git clone https://github.com/theo-mrn/trivy-dashboard-web.git
+cd trivy-dashboard-web
+npm install
+```
+
+Create `.env.local`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Connect to the backend
 
-## Learn More
+The frontend talks to the [TrivyHub API](https://github.com/theo-mrn/trivy_dashboard). Set `NEXT_PUBLIC_API_URL` to point to your backend instance.
 
-To learn more about Next.js, take a look at the following resources:
+In Vercel: **Settings → Environment Variables → `NEXT_PUBLIC_API_URL`**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Session handling
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+JWT tokens are stored in `localStorage`. On expiry (401), the app redirects to `/login?expired=1` with a message.
