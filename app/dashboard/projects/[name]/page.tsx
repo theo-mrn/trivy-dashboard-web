@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, History, Clock, GitCompare, Shield, TrendingUp, TrendingDown } from "lucide-react";
+import { History, Clock, TrendingUp, TrendingDown } from "lucide-react";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { projectsApi, vulnApi } from "@/lib/api";
 import type { Project, Vulnerability, ScanSummary } from "@/lib/types";
 import { SeverityBadge } from "@/components/ui/Badge";
@@ -88,12 +89,14 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb crumbs={[
+        { label: "Projects", href: "/dashboard/projects" },
+        { label: name },
+      ]} />
+
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard/projects" className="text-[#6b7280] hover:text-[#e8eaf0] transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-[#e8eaf0]">{name}</h1>

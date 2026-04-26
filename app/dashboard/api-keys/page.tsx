@@ -5,6 +5,7 @@ import type { APIKey } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import { Plus, Trash2, Copy, Check, Terminal } from "lucide-react";
+import { toast } from "@/components/ui/Toast";
 import { format } from "date-fns";
 
 function NewKeyModal({ onClose, onCreated }: { onClose: () => void; onCreated: (key: APIKey) => void }) {
@@ -47,7 +48,7 @@ function NewKeyModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
 function KeyReveal({ apiKey }: { apiKey: APIKey }) {
   const [copied, setCopied] = useState(false);
   function copy() {
-    if (apiKey.key) navigator.clipboard.writeText(apiKey.key);
+    if (apiKey.key) { navigator.clipboard.writeText(apiKey.key); toast("Key copied to clipboard"); }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -80,8 +81,8 @@ export default function APIKeysPage() {
 
   async function revoke(id: number) {
     if (!confirm("Revoke this key? This cannot be undone.")) return;
-    await apiKeysApi.revoke(id);
-    reload();
+    try { await apiKeysApi.revoke(id); toast("API key revoked"); reload(); }
+    catch (err) { toast(err instanceof Error ? err.message : "Failed", "error"); }
   }
 
   function handleCreated(key: APIKey) {

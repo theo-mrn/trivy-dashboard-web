@@ -7,8 +7,22 @@ import { Card } from "@/components/ui/Card";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import { Empty } from "@/components/ui/Empty";
 import { Search, Filter, Download } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { exportVulnsCSV } from "@/lib/export";
+
+function AgeBadge({ date, severity }: { date: string; severity: string }) {
+  const days = differenceInDays(new Date(), new Date(date));
+  const isCritical = severity === "CRITICAL" && days > 7;
+  const isHigh = severity === "HIGH" && days > 14;
+  const isAlert = isCritical || isHigh;
+  return (
+    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+      isAlert ? "bg-red-500/10 text-red-400 border border-red-500/30" : "bg-[#2a2d3a] text-[#6b7280]"
+    }`}>
+      {days}d {isAlert && "⚠"}
+    </span>
+  );
+}
 
 const SEVERITIES: Severity[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"];
 const SEV_COLORS: Record<Severity, string> = {
@@ -113,7 +127,7 @@ export default function VulnerabilitiesPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#2a2d3a]">
-                {["CVE ID", "Severity", "Package", "Installed", "Fix version", "Title", "Status", "First seen"].map(h => (
+                {["CVE ID", "Severity", "Package", "Installed", "Fix version", "Title", "Status", "Age", "First seen"].map(h => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-medium text-[#6b7280] whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -123,7 +137,7 @@ export default function VulnerabilitiesPage() {
             ) : (
               <tbody className="divide-y divide-[#2a2d3a]">
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={8}><Empty title="No vulnerabilities found" /></td></tr>
+                  <tr><td colSpan={9}><Empty title="No vulnerabilities found" /></td></tr>
                 ) : filtered.map(v => (
                   <tr key={v.id} className="hover:bg-[#1e2028] transition-colors">
                     <td className="px-4 py-3 font-mono text-xs font-semibold text-[#e8eaf0]">{v.cve_id}</td>
@@ -139,6 +153,7 @@ export default function VulnerabilitiesPage() {
                         ? <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">Fixed</span>
                         : <span className="text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">Open</span>}
                     </td>
+                    <td className="px-4 py-3"><AgeBadge date={v.first_seen_at} severity={v.severity} /></td>
                     <td className="px-4 py-3 text-xs text-[#6b7280] whitespace-nowrap">{format(new Date(v.first_seen_at), "MMM d, yyyy")}</td>
                   </tr>
                 ))}

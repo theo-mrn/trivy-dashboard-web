@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { RoleBadge } from "@/components/ui/Badge";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import { UserPlus, Trash2 } from "lucide-react";
+import { toast } from "@/components/ui/Toast";
 import { format } from "date-fns";
 
 function InviteModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
@@ -18,8 +19,8 @@ function InviteModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError("");
-    try { await membersApi.invite(email, role); onSuccess(); onClose(); }
-    catch (err) { setError(err instanceof Error ? err.message : "Failed"); }
+    try { await membersApi.invite(email, role); toast("Member invited successfully"); onSuccess(); onClose(); }
+    catch (err) { setError(err instanceof Error ? err.message : "Failed"); toast(err instanceof Error ? err.message : "Failed", "error"); }
     finally { setLoading(false); }
   }
 
@@ -74,14 +75,14 @@ export default function MembersPage() {
   useEffect(() => { reload(); }, []);
 
   async function changeRole(id: number, role: string) {
-    await membersApi.updateRole(id, role);
-    reload();
+    try { await membersApi.updateRole(id, role); toast("Role updated"); reload(); }
+    catch (err) { toast(err instanceof Error ? err.message : "Failed", "error"); }
   }
 
   async function remove(id: number) {
     if (!confirm("Remove this member?")) return;
-    await membersApi.remove(id);
-    reload();
+    try { await membersApi.remove(id); toast("Member removed"); reload(); }
+    catch (err) { toast(err instanceof Error ? err.message : "Failed", "error"); }
   }
 
   return (
