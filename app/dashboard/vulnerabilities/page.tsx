@@ -6,8 +6,9 @@ import { SeverityBadge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import { Empty } from "@/components/ui/Empty";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Download } from "lucide-react";
 import { format } from "date-fns";
+import { exportVulnsCSV } from "@/lib/export";
 
 const SEVERITIES: Severity[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"];
 const SEV_COLORS: Record<Severity, string> = {
@@ -45,9 +46,19 @@ export default function VulnerabilitiesPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl font-bold text-[#e8eaf0]">Vulnerabilities</h1>
-        <p className="text-sm text-[#6b7280] mt-0.5">Latest scan results across all projects</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-bold" style={{ color: "var(--text)" }}>Vulnerabilities</h1>
+          <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>Latest scan results across all projects</p>
+        </div>
+        <button
+          onClick={() => exportVulnsCSV(filtered, `vulnerabilities-${new Date().toISOString().slice(0,10)}.csv`)}
+          style={{ color: "var(--text-muted)", borderColor: "var(--border)", background: "var(--bg-card)" }}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm hover:border-indigo-500/50 transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </button>
       </div>
 
       {/* Severity tabs */}

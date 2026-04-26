@@ -16,11 +16,26 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
+
+  if (res.status === 401) {
+    // token expiré — redirect propre sans boucle
+    if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
+      clearAuth();
+      window.location.href = "/login?expired=1";
+    }
+    throw new Error("Session expired");
+  }
+
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error ?? `HTTP ${res.status}`);
   }
   return res.json();
+}
+
+function clearAuth() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
 }
 
 // Auth
