@@ -173,7 +173,7 @@ export default function OverviewPage() {
           ) : topRisk.length === 0 ? (
             <div className="px-5 py-8 text-center text-sm text-[#6b7280]">No projects yet</div>
           ) : topRisk.map(p => (
-            <Link key={p.id} href={`/dashboard/projects/${encodeURIComponent(p.name)}/history`}
+            <Link key={p.id} href={`/dashboard/projects/${encodeURIComponent(p.name)}`}
               className="flex items-center justify-between px-5 py-4 hover:bg-[#1e2028] transition-colors group"
             >
               <div className="flex items-center gap-3">

@@ -21,8 +21,8 @@ function ProjectCard({ project }: { project: Project }) {
   const hasIssues = project.critical + project.high + project.medium + project.low > 0;
 
   return (
-    <Card className="hover:border-[#3a3d4a] transition-colors">
-      <div className="p-5">
+    <Card className="hover:border-indigo-500/30 transition-colors cursor-pointer">
+      <Link href={`/dashboard/projects/${encodeURIComponent(project.name)}`} className="block p-5">
         <div className="flex items-start justify-between mb-3">
           <div>
             <h3 className="text-sm font-semibold text-[#e8eaf0]">{project.name}</h3>
@@ -77,7 +77,7 @@ function ProjectCard({ project }: { project: Project }) {
             )}
           </div>
         </div>
-      </div>
+      </Link>
     </Card>
   );
 }

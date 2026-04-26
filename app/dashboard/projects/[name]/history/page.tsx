@@ -118,7 +118,8 @@ function ScanRow({ scan, index }: { scan: ScanSummary; index: number }) {
 }
 
 export default function HistoryPage() {
-  const { name } = useParams<{ name: string }>();
+  const { name: rawName } = useParams<{ name: string }>();
+  const name = decodeURIComponent(rawName);
   const [scans, setScans] = useState<ScanSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
